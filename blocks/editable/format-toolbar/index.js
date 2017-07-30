@@ -1,10 +1,21 @@
 /**
+ * External dependencies
+ */
+import { isUndefined } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __ } from 'i18n';
 import { Component } from 'element';
 import { IconButton, Toolbar } from 'components';
 import { ESCAPE } from 'utils/keycodes';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+import UrlInput from '../../url-input';
 
 const FORMATTING_CONTROLS = [
 	{
@@ -63,17 +74,19 @@ class FormatToolbar extends Component {
 	}
 
 	componentWillReceiveProps( nextProps ) {
-		const newState = {
-			linkValue: nextProps.formats.link ? nextProps.formats.link.value : '',
-		};
+		// Update the link value if the focused link node changes
 		if (
-			! this.props.formats.link ||
-			! nextProps.formats.link ||
-			this.props.formats.link.node !== nextProps.formats.link.node
+			isUndefined( nextProps.formats.link ) !== isUndefined( this.props.formats.link ) ||
+			(
+				nextProps.formats.link && this.props.formats.link &&
+				nextProps.formats.link.node !== this.props.formats.link.node
+			)
 		) {
-			newState.isEditingLink = false;
+			this.setState( {
+				linkValue: nextProps.formats.link ? nextProps.formats.link.value : '',
+				isEditingLink: false,
+			} );
 		}
-		this.setState( newState );
 	}
 
 	toggleFormat( format ) {
@@ -112,10 +125,8 @@ class FormatToolbar extends Component {
 		} );
 	}
 
-	updateLinkValue( event ) {
-		this.setState( {
-			linkValue: event.target.value,
-		} );
+	updateLinkValue( linkValue ) {
+		this.setState( { linkValue } );
 	}
 
 	render() {
@@ -141,35 +152,25 @@ class FormatToolbar extends Component {
 			} );
 		}
 
-		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
-			<div className="editable-format-toolbar">
+			<div className="blocks-format-toolbar">
 				<Toolbar controls={ toolbarControls } />
 
 				{ !! formats.link && this.state.isEditingLink &&
 					<form
-						className="editable-format-toolbar__link-modal"
+						className="blocks-format-toolbar__link-modal"
 						style={ linkStyle }
 						onSubmit={ this.submitLink }>
-						<input
-							autoFocus
-							className="editable-format-toolbar__link-input"
-							type="url"
-							aria-label={ __( 'URL' ) }
-							required
-							value={ this.state.linkValue }
-							onChange={ this.updateLinkValue }
-							placeholder={ __( 'Paste URL or type' ) }
-						/>
+						<UrlInput value={ this.state.linkValue } onChange={ this.updateLinkValue } />
 						<IconButton icon="editor-break" label={ __( 'Apply' ) } type="submit" />
 						<IconButton icon="editor-unlink" label={ __( 'Remove link' ) } onClick={ this.dropLink } />
 					</form>
 				}
 
 				{ !! formats.link && ! this.state.isEditingLink &&
-					<div className="editable-format-toolbar__link-modal" style={ linkStyle }>
+					<div className="blocks-format-toolbar__link-modal" style={ linkStyle }>
 						<a
-							className="editable-format-toolbar__link-value"
+							className="blocks-format-toolbar__link-value"
 							href={ this.state.linkValue }
 							target="_blank"
 						>
@@ -181,7 +182,6 @@ class FormatToolbar extends Component {
 				}
 			</div>
 		);
-		/* eslint-enable jsx-a11y/no-autofocus */
 	}
 }
 

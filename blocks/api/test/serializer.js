@@ -6,13 +6,27 @@ import { createElement, Component } from 'element';
 /**
  * Internal dependencies
  */
-import serialize, { getCommentAttributes, getSaveContent, serializeAttributes } from '../serializer';
+import serialize, {
+	getCommentAttributes,
+	getBeautifulContent,
+	getSaveContent,
+	serializeAttributes,
+} from '../serializer';
 import { getBlockTypes, registerBlockType, unregisterBlockType } from '../registration';
+import { createBlock } from '../';
 
 describe( 'block serializer', () => {
 	afterEach( () => {
 		getBlockTypes().forEach( block => {
 			unregisterBlockType( block.name );
+		} );
+	} );
+
+	describe( 'getBeautifulContent()', () => {
+		it( 'returns beautiful content', () => {
+			const content = getBeautifulContent( '<div><div>Beautiful</div></div>' );
+
+			expect( content ).toBe( '<div>\n    <div>Beautiful</div>\n</div>' );
 		} );
 	} );
 
@@ -168,6 +182,10 @@ describe( 'block serializer', () => {
 	describe( 'serialize()', () => {
 		it( 'should serialize the post content properly', () => {
 			const blockType = {
+				defaultAttributes: {
+					foo: true,
+					bar: false,
+				},
 				attributes: ( rawContent ) => {
 					return {
 						content: rawContent,
@@ -178,18 +196,15 @@ describe( 'block serializer', () => {
 				},
 			};
 			registerBlockType( 'core/test-block', blockType );
-			const blockList = [
-				{
-					name: 'core/test-block',
-					attributes: {
-						content: 'Ribs & Chicken',
-						stuff: 'left & right -- but <not>',
-					},
-				},
-			];
-			const expectedPostContent = '<!-- wp:core/test-block {"stuff":"left \\u0026 right \\u002d\\u002d but \\u003cnot\\u003e"} -->\n<p class="wp-block-test-block">Ribs & Chicken</p>\n<!-- /wp:core/test-block -->';
 
-			expect( serialize( blockList ) ).toEqual( expectedPostContent );
+			const block = createBlock( 'core/test-block', {
+				foo: false,
+				content: 'Ribs & Chicken',
+				stuff: 'left & right -- but <not>',
+			} );
+			const expectedPostContent = '<!-- wp:core/test-block {"foo":false,"stuff":"left \\u0026 right \\u002d\\u002d but \\u003cnot\\u003e"} -->\n<p class="wp-block-test-block">Ribs & Chicken</p>\n<!-- /wp:core/test-block -->';
+
+			expect( serialize( [ block ] ) ).toEqual( expectedPostContent );
 		} );
 	} );
 } );

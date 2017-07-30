@@ -21,7 +21,7 @@ import TextControl from '../../inspector-controls/text-control';
 import BlockControls from '../../block-controls';
 import BlockAlignmentToolbar from '../../block-alignment-toolbar';
 import BlockDescription from '../../block-description';
-import UrlInput from '../../url-input';
+import UrlInputButton from '../../url-input/button';
 
 const { attr, children } = query;
 
@@ -71,7 +71,7 @@ registerBlockType( 'core/image', {
 			setAttributes( { url: media.url, alt: media.alt, caption: media.caption, id: media.id } );
 		};
 		const uploadButtonProps = { isLarge: true };
-		const onSetHref = ( event ) => setAttributes( { href: event.target.value } );
+		const onSetHref = ( value ) => setAttributes( { href: value } );
 
 		const controls = (
 			focus && (
@@ -96,7 +96,7 @@ registerBlockType( 'core/image', {
 								<Dashicon icon="edit" />
 							</MediaUploadButton>
 						</li>
-						<UrlInput onChange={ onSetHref } url={ href } />
+						<UrlInputButton onChange={ onSetHref } url={ href } />
 					</Toolbar>
 				</BlockControls>
 			)
