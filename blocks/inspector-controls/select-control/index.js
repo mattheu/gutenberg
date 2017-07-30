@@ -24,6 +24,7 @@ function SelectControl( { label, selected, instanceId, onBlur, options = [], ...
 				id={ id }
 				className="blocks-select-control__input"
 				onBlur={ onBlurValue }
+				value={ selected }
 				{ ...props }
 			>
 				{ options.map( ( option ) =>
